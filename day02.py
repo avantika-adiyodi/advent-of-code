@@ -11,7 +11,6 @@ invalid_sum_any = 0
 list_repeats = []
 
 def repeat_any(num=int): # check if any repeating sequences
-
     global invalid_sum_twice
     
     num_str = str(num)
@@ -44,11 +43,6 @@ def parse_range(id_range): # takes one range as input
                 invalid_sum_any += num
     return
 
-def go_through_ranges(id_arr):
-    for id_range in id_arr: parse_range(id_range)
-    return
-
-
 if __name__ == "__main__":
 
     arr_str = split_data(load_input(input_file), ",")
@@ -59,8 +53,8 @@ if __name__ == "__main__":
         print("Main: No ranges found! Exiting")
         exit ()
     
-    go_through_ranges(arr_str)
-    print (f"Main: total sum of twice repeating invalid IDs (p1) = {invalid_sum_twice}")
-    print (f"Main: total sum of any repeating invalid IDs (p2) = {invalid_sum_any}")
+    for id_range in arr_str: parse_range(id_range)
+    print (f"Main: (part 1) total sum of twice repeating invalid IDs = {invalid_sum_twice}")
+    print (f"Main: (part 2) total sum of any repeating invalid IDs = {invalid_sum_any}")
 
     

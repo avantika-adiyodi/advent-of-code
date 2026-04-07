@@ -62,6 +62,6 @@ if __name__ == "__main__":
         
     dial = get_step(arr_str, dial)
     print (f"Main: final dial positon = {dial}")
-    print (f"Main: total number of times the dial pointed to 0 = {count_zero}")
-    print (f"Main: total number of times the dial crossed/pointed to 0 = {count_zero + count_zero_cross}")
+    print (f"Main: (part 1) total number of times the dial pointed to 0 = {count_zero}")
+    print (f"Main: (part 2) total number of times the dial crossed/pointed to 0 = {count_zero + count_zero_cross}")
 
