@@ -8,8 +8,8 @@ example = False # set to True to run with example input, False to run with actua
 input_file = os.path.join(os.path.dirname(__file__), "inputs", "inp2.txt")
 input_file_ex = os.path.join(os.path.dirname(__file__), "inputs", "inp2_example.txt") # path to example file
 
-invalid_sum_twice = 0
-invalid_sum_any = 0
+# g_invalid_sum_twice = 0
+# g_invalid_sum_any = 0
 
 def repeating_sequence(num: int) -> bool:
     # return True if num appears as a sub-string in its own doubled string
@@ -18,27 +18,32 @@ def repeating_sequence(num: int) -> bool:
     s = str(num)
     return s in (s + s)[1:-1]
 
-def repeat_any(num: int) -> bool: # check if any repeating sequences
-    global invalid_sum_twice
+def repeat_twice(num: int) -> bool: 
+    # check if any sequences repeat twice only
+    # global g_invalid_sum_twice
     
     num_str = str(num)
 
     # if repeating_sequence(num) and ((len (num_str) % 2) == 0): # check if number only contains twice repeated sequence
-    if ((len (num_str) % 2) == 0): # check if number only contains twice repeated sequence
+    if (len (num_str) % 2) == 0: # check if number only contains twice repeated sequence
         half_len = int((len (num_str)) / 2)
         divide_by = pow (10, half_len)
         x1 = int (num / divide_by)
         x2 = int (num % divide_by)
         if x1 == x2: 
-            invalid_sum_twice += num
+            return True
 
-    return repeating_sequence(num)
+    return False
 
 
 def parse_range(id_range: str): 
     # takes one range as input
     # returns sum of invalid IDs in that range
-    global invalid_sum_any
+    # global g_invalid_sum_any
+    # global g_invalid_sum_twice
+
+    invalid_sum_twice = 0
+    invalid_sum_any = 0
     
     firstID, lastID = id_range.split("-")
     
@@ -47,10 +52,13 @@ def parse_range(id_range: str):
             continue 
         
         if repeating_sequence(num):
+            # g_invalid_sum_any += num
             invalid_sum_any += num
-            repeat_any(num) # check if it also contains twice repeated sequence
+            if repeat_twice(num): # check if it also contains twice repeated sequence
+                # g_invalid_sum_twice += num
+                invalid_sum_twice += num
 
-    return
+    return invalid_sum_twice, invalid_sum_any
 
 if __name__ == "__main__":
     if example:
@@ -65,8 +73,14 @@ if __name__ == "__main__":
     
     print ("Main: got the split ranges\n")
     
-    for id_range in arr_str: parse_range(id_range)
-    print (f"Main: (part 1) total sum of twice repeating invalid IDs = {invalid_sum_twice}")
-    print (f"Main: (part 2) total sum of any repeating invalid IDs = {invalid_sum_any}")
+    total_twice = 0
+    total_any = 0
+    
+    for id_range in arr_str: 
+        invalid_sum_twice, invalid_sum_any = parse_range(id_range)
+        total_twice += invalid_sum_twice
+        total_any += invalid_sum_any
+    print (f"Main: (part 1) total sum of twice repeating invalid IDs = {total_twice}")
+    print (f"Main: (part 2) total sum of any repeating invalid IDs = {total_any}")
 
     
