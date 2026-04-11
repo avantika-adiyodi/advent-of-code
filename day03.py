@@ -1,4 +1,5 @@
 # --- Day 3: Lobby ---
+# maximum output joltage
 
 import os
 from helpers import load_input, split_data
@@ -7,7 +8,7 @@ example = False # set to True to run with example input, False to run with actua
 input_file = os.path.join(os.path.dirname(__file__), "inputs", "inp3.txt")
 input_file_ex = os.path.join(os.path.dirname(__file__), "inputs", "inp3_example.txt") # path to example file
 
-def parse_bank (bank: str, battery_count: int):
+def parse_bank (bank: str, battery_count: int) -> int:
     # Extract joltage from a single bank string
 
     """
@@ -21,22 +22,24 @@ def parse_bank (bank: str, battery_count: int):
     # we search until the index: -(battery_count - 1) to accomodate the boundary condition
     curr_index = 0
     last_index = -(battery_count - 1)
-    bank_length = len(bank)
 
     while remaining > 0:
-        max_digit = int(max(bank[:last_index])) # find the largest digit at lowest index
-        curr_index = bank.index(max(bank [:last_index])) # store index of current largest number
+        max_digit = max(bank[:last_index]) # find the largest digit at lowest index
+        curr_index = bank.index(max_digit) # store index of current largest number
 
-        bank = bank [curr_index+1:]
-        joltage = joltage * 10 + max_digit
+        bank = bank [curr_index + 1:]
+        joltage = joltage * 10 + int(max_digit)
         
-        if last_index == -1: last_index = bank_length # handle when bank becomes bank [:0] ie empty string
-        else: last_index += 1
+        if last_index == -1: 
+            last_index = len(bank) # handle when bank becomes bank [:0] ie empty string
+        else: 
+            last_index += 1
+
         remaining -= 1
 
     return joltage
 
-def go_through_banks (arr_str: list[str], battery_count: int):
+def go_through_banks (arr_str: list[str], battery_count: int) -> int:
     # sums the joltage across all banks
     # battery count: number of batteries that are ON in each bank
     joltage = 0
