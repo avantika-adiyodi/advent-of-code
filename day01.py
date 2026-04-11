@@ -8,48 +8,44 @@ example = False # set to True to run with example input, False to run with actua
 input_file = os.path.join(os.path.dirname(__file__), "inputs", "inp1.txt")
 input_file_ex = os.path.join(os.path.dirname(__file__), "inputs", "inp1_example.txt") # path to example file
 
-count_zero = 0
-count_zero_cross = 0
+def change_per_rot (direction: str, rot: int, dial: int) -> tuple[int, int, int]:
+    # to calculate change per rotation
+    # returns the new dial position after rotation, points to zero for this step, and zero crosses for this step
 
-# to calculate change per rotation
-# returns the current dial postion after rotation
-def change_per_rot (direction, rot, dial):
-    global count_zero_cross, count_zero
-    count_zero_cross += rot // 100
+    zero_points = 0
+    zero_crosses = rot // 100
     rot = rot % 100
-    
-    match direction:
-        case "L":
+  
+    if direction == "L":
+        change = dial - rot
+        if dial != 0 and change < 0:
+            zero_crosses += 1
 
-            if dial != 0:
-                dial = dial - rot 
-                if dial < 0: count_zero_cross += 1
-                dial = dial % 100
-            else: 
-                dial = (dial - rot) % 100
+    else: # direction == "R"
+        change = dial + rot
+        if dial != 0 and change > 100:
+            zero_crosses += 1
 
-        case "R":
+    new_dial = change % 100
 
-            if dial != 0:
-                dial = dial + rot
-                if dial > 100: count_zero_cross += 1
-                dial = dial % 100
-            else: 
-                dial = (dial + rot) % 100
-    
-    if dial == 0:
-        count_zero += 1
+    if new_dial == 0:
+        zero_points += 1
 
-    return dial
+    return new_dial, zero_points, zero_crosses
 
-# to get each rotation and count
-# returns the position of dial per command
-def get_step (arr_exp, dial):
-    for i in arr_exp:
-        direction = i[0]
-        rot = int(i[1:])
-        dial = change_per_rot(direction, rot, dial)
-    return dial
+def get_step (commands: list[str], dial: int) -> tuple[int, int, int]:
+    # to get each rotation and count
+    # returns the position of dial per command
+    total_zero_points = 0
+    total_zero_crosses = 0
+    for cmd in commands:
+        direction = cmd[0]
+        rot = int(cmd[1:])
+        dial, points, crosses = change_per_rot(direction, rot, dial)
+        total_zero_points += points
+        total_zero_crosses += crosses
+
+    return dial, total_zero_points, total_zero_crosses
 
 if __name__ == "__main__":
     if example:
@@ -66,7 +62,7 @@ if __name__ == "__main__":
     dial = 50
     print (f"Main: initial dial positon = {dial}")
 
-    dial = get_step(arr_str, dial)
+    dial, count_zero, count_zero_cross = get_step(arr_str, dial)
     print (f"Main: final dial positon = {dial}")
     print (f"Main: (part 1) total number of times the dial pointed to 0 = {count_zero}")
     print (f"Main: (part 2) total number of times the dial crossed/pointed to 0 = {count_zero + count_zero_cross}")
