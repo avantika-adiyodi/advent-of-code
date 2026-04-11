@@ -8,10 +8,7 @@ example = False # set to True to run with example input, False to run with actua
 input_file = os.path.join(os.path.dirname(__file__), "inputs", "inp2.txt")
 input_file_ex = os.path.join(os.path.dirname(__file__), "inputs", "inp2_example.txt") # path to example file
 
-# g_invalid_sum_twice = 0
-# g_invalid_sum_any = 0
-
-def repeating_sequence(num: int) -> bool:
+def repeat_any(num: int) -> bool:
     # return True if num appears as a sub-string in its own doubled string
     # i.e. it is a rotation of itself — meaning it contains a repeated sequence
     
@@ -19,28 +16,20 @@ def repeating_sequence(num: int) -> bool:
     return s in (s + s)[1:-1]
 
 def repeat_twice(num: int) -> bool: 
-    # check if any sequences repeat twice only
-    # global g_invalid_sum_twice
-    
+    # check if number only contains twice repeated sequence    
     num_str = str(num)
 
-    # if repeating_sequence(num) and ((len (num_str) % 2) == 0): # check if number only contains twice repeated sequence
-    if (len (num_str) % 2) == 0: # check if number only contains twice repeated sequence
-        half_len = int((len (num_str)) / 2)
-        divide_by = pow (10, half_len)
-        x1 = int (num / divide_by)
-        x2 = int (num % divide_by)
-        if x1 == x2: 
-            return True
+    if len(num_str) % 2 != 0: # has to be even length to repeat twice
+        return False
 
-    return False
+    divide_by = 10 ** (len (num_str) // 2)
+    x1 = int (num / divide_by)
+    x2 = int (num % divide_by)
+    return x1 == x2
 
-
-def parse_range(id_range: str): 
+def parse_range(id_range: str) -> tuple[int, int]:
     # takes one range as input
     # returns sum of invalid IDs in that range
-    # global g_invalid_sum_any
-    # global g_invalid_sum_twice
 
     invalid_sum_twice = 0
     invalid_sum_any = 0
@@ -51,11 +40,9 @@ def parse_range(id_range: str):
         if len(str(num)) <= 1: # min 2 digits needs to repeat
             continue 
         
-        if repeating_sequence(num):
-            # g_invalid_sum_any += num
+        if repeat_any(num):
             invalid_sum_any += num
             if repeat_twice(num): # check if it also contains twice repeated sequence
-                # g_invalid_sum_twice += num
                 invalid_sum_twice += num
 
     return invalid_sum_twice, invalid_sum_any
