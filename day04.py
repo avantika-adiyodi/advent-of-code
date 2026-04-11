@@ -9,35 +9,52 @@ example = False # set to True to run with example input, False to run with actua
 input_file = os.path.join(os.path.dirname(__file__), "inputs", "inp4.txt")
 input_file_ex = os.path.join(os.path.dirname(__file__), "inputs", "inp4_example.txt") # path to example file
 
-def go_through_forklift (forklift):
+def go_through_forklift (forklift, loop = False):
     
     # Convert each string into a list of characters
     char_array = np.array([list(row) for row in forklift]) # each string in forklift is converted to a list of characters, and then the list of lists is converted to a numpy array
-    
     forklift_int = (char_array == '@').astype(int)
     
+    # rolls_row, rolls_column = np.where(forklift_int == 1) # returns row numbers and column numbers of wherever there is an '@' in the forklift
+    # coords = list(zip(rolls_row, rolls_column)) # zips the row numbers and column numbers together to get the coordinates of each '@' in the forklift
+    # # coords = list(zip(np.where(forklift_int == 1)))
+    
+    # # coords is a list of tuples -> [(i1, j1), (i2, j2)] where (i, j) is the position where value of forklift_int = 1
+    # # print (f"rolls_row = {rolls_row}, rolls_column = {rolls_column}")
+
     # convolve in Moore neighborhood of each cell in forklift
     kernel = np.array([[1, 1, 1],
                        [1, 0, 1],
                        [1, 1, 1]])
     moore_neighborhood = nd.convolve(forklift_int, kernel, mode='constant', cval=0)
 
-    roll_count = np.sum((forklift_int == 1) & (moore_neighborhood < 4))
-    
-    # print (f"forklift as integers = \n{forklift_int}")
-    # print (f"output after convolution = \n{out}")
-    # print (f"neighbors = \n{neighbors}")
+    rolls_row, rolls_column = np.where((forklift_int == 1) & (moore_neighborhood < 4)) # returns row numbers and column numbers of wherever there is an accessible roll in the forklift
+    # coords = list(zip(rolls_row, rolls_column)) # zips the row numbers and column numbers together to get the coordinates of each '@' in the forklift
+    accessible_rolls = np.sum((forklift_int == 1) & (moore_neighborhood < 4))
 
-    # print (f"accessible rolls = \n{np.where(neighbors < 4)}")
+    
+    roll_count = accessible_rolls
+    if loop:
+        """
+        update forklift to remove the current rolls and repeat till roll_count = 0
+        """
+        while accessible_rolls > 0:
+            if rolls_row is not None and rolls_column is not None:
+                forklift_int [rolls_row, rolls_column] -= 1
+            
+            moore_neighborhood = nd.convolve(forklift_int, kernel, mode='constant', cval=0)
+            
+            rolls_row, rolls_column = np.where((forklift_int == 1) & (moore_neighborhood < 4))
+            accessible_rolls = np.sum((forklift_int == 1) & (moore_neighborhood < 4))
+            roll_count += accessible_rolls
+    
 
     return roll_count 
-
-
 
 if __name__ == "__main__":
     if example == True: 
         input_file = input_file_ex
-        print ("Main: Running with example input.\n")
+        print ("\nMain: Running with example input.")
     
     arr_str = split_data(load_input(input_file), "\n")
     
@@ -47,6 +64,7 @@ if __name__ == "__main__":
         print("Main: No battery banks found! Exiting")
         exit ()
         
-    roll_count = go_through_forklift(arr_str)
-    print(f"Main: (part 1) accessible rolls (total neighboring rolls < 4)= {roll_count}")
-    print(f"Main: (part 2) = ")
+    roll_count_once = go_through_forklift(arr_str, loop=False)
+    roll_count_loop = go_through_forklift(arr_str, loop=True)
+    print(f"Main: (part 1) accessible rolls without looping = {roll_count_once}")
+    print(f"Main: (part 2) accessible rolls until all are processed = {roll_count_loop}")
