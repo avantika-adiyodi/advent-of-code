@@ -1,9 +1,12 @@
+# --- Day 2: Gift Shop ---
 # sum of all invalid IDs 
 
 import os
 from helpers import load_input, split_data
 
+example = False # set to True to run with example input, False to run with actual input
 input_file = os.path.join(os.path.dirname(__file__), "inputs", "inp2.txt")
+input_file_ex = os.path.join(os.path.dirname(__file__), "inputs", "inp2_example.txt") # path to example file
 
 count = 0
 invalid_sum_twice = 0
@@ -44,14 +47,17 @@ def parse_range(id_range): # takes one range as input
     return
 
 if __name__ == "__main__":
+    if example:
+        input_file = input_file_ex
+        print("\nMain: Running with example input.")
 
     arr_str = split_data(load_input(input_file), ",")
     
-    if arr_str:
-        print ("Main: got the splitted ranges\n")
-    else: 
+    if not arr_str:
         print("Main: No ranges found! Exiting")
         exit ()
+    
+    print ("Main: got the splitted ranges\n")
     
     for id_range in arr_str: parse_range(id_range)
     print (f"Main: (part 1) total sum of twice repeating invalid IDs = {invalid_sum_twice}")
