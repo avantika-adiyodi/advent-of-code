@@ -1,5 +1,5 @@
 # load input file
-def load_input(file_path):
+def load_input(file_path: str):
     # return file contents as a string or None on failure.
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -11,7 +11,7 @@ def load_input(file_path):
     return None
 
 # split the input file into it's individual inputs
-def split_data(content=list, separator=str):
+def split_data(content: list, separator: str) -> list[str]:
     # returns list of non-empty data from string
     if not content:
         return []
