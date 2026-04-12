@@ -2,79 +2,76 @@
 # fresh ingredients in the cafeteria
 
 import os
-from helpers import load_input, split_data
+from helpers import load_input
 import bisect
 
 example = False # set to True to run with example input, False to run with actual input
 input_file = os.path.join(os.path.dirname(__file__), "inputs", "inp5.txt")
 input_file_ex = os.path.join(os.path.dirname(__file__), "inputs", "inp5_example.txt") # path to example file
 
-def split_database_inputs(content: str) -> list[str]:
-    # split input file into list of ranges and list of ingredient IDs
+
+def split_database_inputs(content: str, separator: str) -> list[str, str]:
+    # function to split the input file into list of ranges and list of IDs according to separator
+    # returns list of ranges and IDs
     if not content:
-        return []
+        return [], []
     
     # to separate range and IDs
-    sep = content.index("\n\n")
-    ranges = content[:sep].split("\n")
-    ids = content[sep+2:].split("\n")
+    seperation_idx = content.index(separator)
+    ranges = content[:seperation_idx].split("\n")
+    ids = content[seperation_idx + 2:].split("\n")
     return ranges, ids
 
 
-def merge_intervals(ranges: list[tuple]):
+def merge_ranges(ranges: list[tuple]) -> list:
+    # function to merge overlapping ranges
+    # parameter ranges: list of ranges to merge
+    # returns list of all the ranges merged
     ranges.sort()
-    merged = []
+    merged_range = []
 
     for start, end in ranges:
-        if not merged or merged[-1][1] < start:
-            merged.append([start, end])
+        if not merged_range or merged_range[-1][1] < start:
+            merged_range.append([start, end])
         else:
-            merged[-1][1] = max(merged[-1][1], end)
-    return merged
+            merged_range[-1][1] = max(merged_range[-1][1], end)
+    return merged_range
 
 
-def contains(merged: list, x: int) -> bool:
-    # find position where x would go
-    i = bisect.bisect_right(merged, [x, float('inf')]) - 1
+def range_contains_ID (range_IDs: list, check_id: int) -> bool:
+    # function to check if the given ID is in any of the given ranges
+    # find the index of the range that could contain the check_id and check if the check_id is within the range
+    range_index = bisect.bisect_right(range_IDs, [check_id, float('inf')]) - 1 
     
-    if i >= 0:
-        start, end = merged[i]
-        return start <= x <= end
+    if range_index >= 0:
+        start, end = range_IDs[range_index] 
+        return start <= check_id <= end 
     
     return False
 
 
-def find_fresh_ingredients (fresh_range_str: list[str], ingredient_ids: list[str]) -> int:
-    ranges_str = []
+def find_fresh_ingredients (ranges_str: list[str], ingredient_ids: list[str]):
+    # function to find the total number of fresh ingredients and the number of available fresh ingredients
+    fresh_ranges = []
     available_fresh_ingredients = 0
     total_fresh_ingredients = 0
 
     # get the range of fresh ingredients
-    for range_str in fresh_range_str:
+    for range_str in ranges_str:
         start, end = range_str.split("-")
-        tuple_ = (int(start), int(end))
-        ranges_str.append(tuple_)
+        fresh_ranges.append((int(start), int(end)))
 
-    fresh_range = merge_intervals(ranges_str)
-    # print(f"fresh_range[0] = {fresh_range[0]}")
-    # print(f"fresh range = {fresh_range}")
-    # print(f"{(range_[0], range_[1]) for range_ in fresh_range}")
+    fresh_ranges = merge_ranges(fresh_ranges)
 
     # get count of total fresh ingredients
-    for range_ in fresh_range:
-        start = range_[0]
-        end = range_[1]
-        length = len(range(start, end+1))
-        total_fresh_ingredients += length
-        # total_fresh_ingredients += len(range(range_[0], range_[1]))
-        pass
+    for fresh_range in fresh_ranges:
+        # length = len(range(fresh_range[0], fresh_range[1] + 1))
+        total_fresh_ingredients += len(range(fresh_range[0], fresh_range[1] + 1))
 
-    # get count of available fresh ingredients
+    # get count of available fresh ingredients in inventory
     for ingredient in ingredient_ids:
-        if contains (fresh_range, int(ingredient)):
+        if range_contains_ID (fresh_ranges, int(ingredient)):
             available_fresh_ingredients += 1
-
-    
     
     return available_fresh_ingredients, total_fresh_ingredients
 
@@ -85,12 +82,7 @@ if __name__ == "__main__":
         input_file = input_file_ex
         print("\nMain: Running with example input.")
 
-    # print(f"Main: input file = {load_input(input_file)}")
-    # arr_str = split_data(load_input(input_file), "\n")
-
-    ranges_str, ingredientIDs_str = split_database_inputs(load_input(input_file))
-    # print (f"Main: ranges_str = {ranges_str}")
-    # print (f"Main: ingredientIDs_str = {ingredientIDs_str}")
+    fresh_ranges_str, ingredientIDs_str = split_database_inputs(load_input(input_file), separator="\n\n")
     
     if not ingredientIDs_str:
         print("Main: No ingredients IDs found! Exiting")
@@ -98,7 +90,7 @@ if __name__ == "__main__":
 
     print("Main: got the ingredients database.\n")
 
-    fresh_ingredients, total_ingredients = find_fresh_ingredients(ranges_str, ingredientIDs_str)
+    fresh_ingredients, total_ingredients = find_fresh_ingredients(fresh_ranges_str, ingredientIDs_str)
 
     print(f"Main: (part 1) total number of available fresh ingredients = {fresh_ingredients}")
     print(f"Main: (part 2) total number of fresh ingredients = {total_ingredients}")
