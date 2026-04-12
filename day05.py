@@ -17,9 +17,9 @@ def split_database_inputs(content: str, separator: str) -> list[str, str]:
         return [], []
     
     # to separate range and IDs
-    seperation_idx = content.index(separator)
-    ranges = content[:seperation_idx].split("\n")
-    ids = content[seperation_idx + 2:].split("\n")
+    parts = content.split(separator)
+    ranges = parts[0].splitlines()
+    ids = parts[1].splitlines()
     return ranges, ids
 
 
@@ -50,7 +50,7 @@ def range_contains_ID (range_IDs: list, check_id: int) -> bool:
     return False
 
 
-def find_fresh_ingredients (ranges_str: list[str], ingredient_ids: list[str]):
+def find_fresh_ingredients (ranges_str: list[str], ingredient_ids_str: list[str]):
     # function to find the total number of fresh ingredients and the number of available fresh ingredients
     fresh_ranges = []
     available_fresh_ingredients = 0
@@ -64,14 +64,12 @@ def find_fresh_ingredients (ranges_str: list[str], ingredient_ids: list[str]):
     fresh_ranges = merge_ranges(fresh_ranges)
 
     # get count of total fresh ingredients
-    for fresh_range in fresh_ranges:
-        # length = len(range(fresh_range[0], fresh_range[1] + 1))
-        total_fresh_ingredients += len(range(fresh_range[0], fresh_range[1] + 1))
+    total_fresh_ingredients = sum (fresh_range[1] - fresh_range[0] + 1 for fresh_range in fresh_ranges)
 
     # get count of available fresh ingredients in inventory
-    for ingredient in ingredient_ids:
-        if range_contains_ID (fresh_ranges, int(ingredient)):
-            available_fresh_ingredients += 1
+    ingredient_ids = [int(ingredient) for ingredient in ingredient_ids_str]
+
+    available_fresh_ingredients = sum(1 for ingredient in ingredient_ids if range_contains_ID(fresh_ranges, ingredient))
     
     return available_fresh_ingredients, total_fresh_ingredients
 
@@ -82,15 +80,16 @@ if __name__ == "__main__":
         input_file = input_file_ex
         print("\nMain: Running with example input.")
 
-    fresh_ranges_str, ingredientIDs_str = split_database_inputs(load_input(input_file), separator="\n\n")
+    content = load_input(input_file)
+    fresh_ranges_str, ingredientIDs_str = split_database_inputs(content, separator="\n\n")
     
     if not ingredientIDs_str:
-        print("Main: No ingredients IDs found! Exiting")
+        print("Main: No ingredient IDs found! Exiting")
         exit()
 
-    print("Main: got the ingredients database.\n")
+    print("Main: got the ingredient database.\n")
 
     fresh_ingredients, total_ingredients = find_fresh_ingredients(fresh_ranges_str, ingredientIDs_str)
 
-    print(f"Main: (part 1) total number of available fresh ingredients = {fresh_ingredients}")
-    print(f"Main: (part 2) total number of fresh ingredients = {total_ingredients}")
+    print(f"Main: (part 1) available fresh ingredients = {fresh_ingredients}")
+    print(f"Main: (part 2) total fresh ingredients = {total_ingredients}")
